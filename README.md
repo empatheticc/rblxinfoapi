@@ -5,7 +5,8 @@ This uses Roblox's web API(users.roblox.com) to find quick information on an use
 # Install
 You must have **requests** installed through **pip**:
 ```pip install requests```
-\nRequests SHOULD come preinstalled when installing the latest version of Python, however, it is in your best interests to install it just to make sure.
+
+Requests SHOULD come preinstalled when installing the latest version of Python, however, it is in your best interests to install it just to make sure.
 
 It is also in your best interests to keep **main.py** in a separate folder to keep everything organized and to make space for **groups_info.txt** which gets automatically created when the script is run successfully.
 
