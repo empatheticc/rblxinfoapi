@@ -79,6 +79,48 @@ def write_groups_to_file(groups_info, filename):
     except IOError as e:
         print(f"Error occurred while writing to file: {e}")
 
+def is_in_group(account_id, group_id):
+    groups_info = get_groups(account_id)
+    if groups_info:
+        for group in groups_info["data"]:
+            if group["group"]["id"] == group_id:
+                return True
+    return False
+
+def get_mutual_friends_in_group(account_id, group_id):
+    url = f"https://friends.roblox.com/v1/users/{account_id}/friends"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        
+        friends_info = response.json()
+        mutual_friends_in_group = []
+
+        for friend in friends_info["data"]:
+            friend_id = friend["id"]
+            friend_info = get_account_info(friend_id)
+            
+            if friend_info:
+                if is_in_group(friend_id, group_id):
+                    friend_name = friend_info["name"]
+                    friend_rank = get_friend_rank_in_group(friend_id, group_id)
+                    mutual_friends_in_group.append({"name": friend_name, "rank": friend_rank})
+        
+        return mutual_friends_in_group
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred: {e}")
+        return None
+
+def get_friend_rank_in_group(friend_id, group_id):
+    groups_info = get_groups(friend_id)
+    if groups_info:
+        for group in groups_info["data"]:
+            if group["group"]["id"] == group_id:
+                return group["role"]["name"]
+    return "Not in Group"
+
+
 if __name__ == "__main__":
     account_id = int(input("Insert the account ID you want to fetch information for: \n"))
     account_info = get_account_info(account_id)
@@ -100,6 +142,17 @@ if __name__ == "__main__":
         else:
             print("This account may be a legitimate account, however, do remember to check the profile.")
             print(f"Go to https://www.roblox.com/users/{account_id}/profile to verify my claims. Again, I'm just a silly .py file with limited access to the creme de la creme that is Roblox API.")
+        
+        group_id = int(input("Insert the group ID you want to check mutual friends in: \n"))
+        mutual_friends = get_mutual_friends_in_group(account_id, group_id)
+        if mutual_friends:
+            print("\nMutual Friends in Group:")
+            for friend_info in mutual_friends:
+                friend_name = friend_info["name"]
+                friend_rank = friend_info["rank"]
+                print(f"{friend_name} + {friend_rank}")
+        else:
+            print("\nNo mutual friends found in the group.")
         
     else:
         print("Failed to retrieve account information.")
